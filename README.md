@@ -35,7 +35,7 @@ The readmesync.json is copied to the /config volume when first run. It has two m
 
 **API - GET command**
 
-You can provide a GitHub branch if you want to sync a `README.md` from an branch other than master, if none if provided master is assumed.
+You can provide a GitHub branch if you want to sync a `README.md` from an branch other than master, if none is provided master is assumed.
 ```
 http://<ip_address>:<port>/description/update?github_repo=<github_repo>&dockerhub_repo=<dockerhub_repo>
 http://<ip_address>:<port>/description/update?github_repo=<github_repo>&github_branch=<github_branch>&dockerhub_repo=<dockerhub_repo>
