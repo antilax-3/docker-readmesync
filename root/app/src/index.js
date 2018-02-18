@@ -47,9 +47,9 @@ app.get('*', (req, res) => {
     const getReadme = await new Promise((resolve, reject) => {
       fetch.fetchUrl(`https://raw.githubusercontent.com/${query.github_repo}/${query.github_branch}/README.md`, (error, meta, body) => {
         if (error) {
-          reject(`Unable to fetch README.md from GitHub repository: ${query.github_repo} branch: ${query.github_branch}`);
+          return reject(`Unable to fetch README.md from GitHub repository: ${query.github_repo} branch: ${query.github_branch}`);
         }
-        resolve({ meta, body: body.toString() });
+        return resolve({ meta, body: body.toString() });
       });
     });
 
