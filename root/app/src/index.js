@@ -3,13 +3,13 @@ import fetch from 'fetch';
 import dockerHubAPI from 'docker-hub-api';
 import loadConfig from './config';
 
-const config = loadConfig('/config/readmesync.json', []);
+const config = loadConfig('/config/readmesync.json', ['dockerhub_username', 'dockerhub_password']);
 
 const port = config.port || 3020;
 
 // Setup our HTTP webserver
 const app = express();
-app.get('/description/update', (req, res, next) => {
+app.get('*', (req, res) => {
   const { query } = req;
 
   if (!query.hasOwnProperty('github_repo') || !query.hasOwnProperty('dockerhub_repo')) {
@@ -39,7 +39,6 @@ app.get('/description/update', (req, res, next) => {
     }
 
     // Login to dockerhub
-    console.log(`Logging in as ${config.dockerhub_username}`);
     await dockerHubAPI.login(config.dockerhub_username, config.dockerhub_password)
       .catch(() => {
         throw new Error('Unable to login to docker hub, check credentials');
