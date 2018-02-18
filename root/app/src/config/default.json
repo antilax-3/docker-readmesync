@@ -1,0 +1,5 @@
+{
+  "dockerhub_username": "user",
+  "dockerhub_password": "password",
+  "port": 80
+}
