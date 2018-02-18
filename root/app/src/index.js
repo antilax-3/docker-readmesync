@@ -24,7 +24,7 @@ app.get('*', (req, res) => {
   const dockerhub_name = query.dockerhub_repo.split('/')[1];
 
   const update = async () => {
-    // Check the repo's exist
+    // Check the repository exists
     const checkGithubRepo = await new Promise((resolve) => {
       fetch.fetchUrl(`https://github.com/${query.github_repo}`, (error) => {
         if (error) {
@@ -35,19 +35,19 @@ app.get('*', (req, res) => {
     });
 
     if (!checkGithubRepo) {
-      return res.status(400).send('Github repository not found');
+      return res.status(400).send(`GitHub repository: ${query.github_repo} not found`);
     }
 
-    // Login to dockerhub
+    // Login to DockerHub
     await dockerHubAPI.login(config.dockerhub_username, config.dockerhub_password)
       .catch(() => {
-        throw new Error('Unable to login to docker hub, check credentials');
+        throw new Error('Unable to login to DockerHub, check credentials');
       });
 
     const getReadme = await new Promise((resolve, reject) => {
       fetch.fetchUrl(`https://raw.githubusercontent.com/${query.github_repo}/${query.github_branch}/README.md`, (error, meta, body) => {
         if (error) {
-          reject('Unable to fetch readme file');
+          reject(`Unable to fetch README.md from GitHub repository: ${query.github_repo} branch: ${query.github_branch}`);
         }
         resolve({ meta, body: body.toString() });
       });
@@ -69,8 +69,6 @@ app.get('*', (req, res) => {
 app.use((err, req, res, next) => {
   res.statusCode = 500;
 
-  // Dev only:
-  //res.json({ error: err.message });
   next();
 });
 
