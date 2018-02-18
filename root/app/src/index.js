@@ -5,7 +5,7 @@ import loadConfig from './config';
 
 const config = loadConfig('/config/readmesync.json', ['dockerhub_username', 'dockerhub_password']);
 
-const port = config.port || 3020;
+const port = config.port || 80;
 
 // Setup our HTTP webserver
 const app = express();
