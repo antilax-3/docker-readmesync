@@ -16,6 +16,10 @@ app.get('/description/update', (req, res, next) => {
     return res.status(400).send('Missing required fields in GET request');
   }
 
+  if (!query.hasOwnProperty('github_branch')) {
+    query.github_branch = 'master';
+  }
+
   const dockerhub_username = query.dockerhub_repo.split('/')[0];
   const dockerhub_name = query.dockerhub_repo.split('/')[1];
 
@@ -42,7 +46,7 @@ app.get('/description/update', (req, res, next) => {
       });
 
     const getReadme = await new Promise((resolve, reject) => {
-      fetch.fetchUrl(`https://raw.githubusercontent.com/${query.github_repo}/${'master'}/README.md`, (error, meta, body) => {
+      fetch.fetchUrl(`https://raw.githubusercontent.com/${query.github_repo}/${query.github_branch}/README.md`, (error, meta, body) => {
         if (error) {
           reject('Unable to fetch readme file');
         }
