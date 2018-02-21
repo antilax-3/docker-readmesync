@@ -22,5 +22,3 @@ rm -rf \
 # ports and volumes
 EXPOSE 80
 VOLUME /config
-
-CMD ["node", "main.js"]
