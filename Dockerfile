@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM antilax3/node
 
 # set environment variables
 ENV NODE_CONFIG_DIR /config
