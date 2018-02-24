@@ -1,3 +1,6 @@
+[logo]: https://ci.nerv.com.au/userContent/antilax-3.png "AntilaX-3"
+![alt text][logo]
+
 # AntilaX-3/readme-sync
 [![](https://images.microbadger.com/badges/version/antilax3/readme-sync.svg)](https://microbadger.com/images/antilax3/readme-sync "Get your own version badge on microbadger.com") [![](https://images.microbadger.com/badges/image/antilax3/readme-sync.svg)](https://microbadger.com/images/antilax3/readme-sync "Get your own image badge on microbadger.com") [![Docker Pulls](https://img.shields.io/docker/pulls/antilax3/readme-sync.svg)](https://hub.docker.com/r/antilax3/readme-sync/) [![Docker Stars](https://img.shields.io/docker/stars/antilax3/readme-sync.svg)](https://hub.docker.com/r/antilax3/readme-sync/)
 
@@ -51,5 +54,5 @@ http://<ip_address>:<port>/description/update?github_repo=<github_repo>&dockerhu
 http://<ip_address>:<port>/description/update?github_repo=<github_repo>&github_branch=<github_branch>&dockerhub_repo=<dockerhub_repo>
 ```
 ## Version
-- **22/02/18:** | Updated to use alpine 3.7 image and build with jenkins
-- **18/02/18:** | Initial Release
+- **22/02/18:** Updated to use alpine 3.7 image and build with jenkins
+- **18/02/18:** Initial Release
