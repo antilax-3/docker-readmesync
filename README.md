@@ -54,5 +54,6 @@ http://<ip_address>:<port>/description/update?github_repo=<github_repo>&dockerhu
 http://<ip_address>:<port>/description/update?github_repo=<github_repo>&github_branch=<github_branch>&dockerhub_repo=<dockerhub_repo>
 ```
 ## Version
+- **04/07/25:** Updated to use alpine 3.22 image and s6 v3 service structure
 - **22/02/18:** Updated to use alpine 3.7 image and build with jenkins
 - **18/02/18:** Initial Release

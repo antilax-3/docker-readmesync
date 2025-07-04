@@ -18,13 +18,13 @@ COPY root/ /
 
 # install packages
 RUN \
-echo "**** build node application ****" && \
-cd /app && npm install && NODE_OPTIONS=--openssl-legacy-provider npm run build && mv build/main.js . && \
-echo "**** cleanup ****" && \
-rm -rf \
-    package*.json \
-    build \
-    src
+  echo "**** build node application ****" && \
+    cd /app && npm install && NODE_OPTIONS=--openssl-legacy-provider npm run build && mv build/main.js . && \
+  echo "**** cleanup ****" && \
+    rm -rf \
+      package*.json \
+      build \
+      src
 
 # ports and volumes
 EXPOSE 80
