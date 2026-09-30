@@ -53,6 +53,20 @@ You can provide a GitHub branch if you want to sync a `README.md` from an branch
 http://<ip_address>:<port>/description/update?github_repo=<github_repo>&dockerhub_repo=<dockerhub_repo>
 http://<ip_address>:<port>/description/update?github_repo=<github_repo>&github_branch=<github_branch>&dockerhub_repo=<dockerhub_repo>
 ```
+## Development
+
+Linting runs locally through [lefthook](https://github.com/evilmartians/lefthook). Install the hooks once per clone:
+
+```bash
+lefthook install
+```
+
+`pre-commit` runs [editorconfig-checker](https://github.com/editorconfig-checker/editorconfig-checker), [hadolint](https://github.com/hadolint/hadolint), `jq`, [shellcheck](https://github.com/koalaman/shellcheck), [typos](https://github.com/crate-ci/typos) and [yamllint](https://github.com/adrienverge/yamllint) over the staged files, and `commit-msg` enforces [Conventional Commits](https://www.conventionalcommits.org). Run everything on demand with:
+
+```bash
+lefthook run pre-commit --all-files
+```
+
 ## Version
 - **04/07/25:** Updated to use alpine 3.22 image and s6 v3 service structure
 - **22/02/18:** Updated to use alpine 3.7 image and build with jenkins
