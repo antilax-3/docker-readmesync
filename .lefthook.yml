@@ -7,7 +7,7 @@ pre-commit:
         MISSING=""
         COUNT=0
 
-        for TOOL in editorconfig-checker hadolint jq shellcheck typos yamllint; do
+        for TOOL in editorconfig-checker go golangci-lint hadolint jq shellcheck typos yamllint; do
           if ! command -v ${TOOL} >/dev/null 2>&1; then
             if [ "${COUNT}" -eq 0 ]; then
               MISSING=${TOOL}
@@ -31,6 +31,15 @@ pre-commit:
         jobs:
           - name: editorconfig-checker
             run: editorconfig-checker {staged_files} && echo "0 issues."
+
+          - name: golangci-lint
+            # Lints whole packages, as a staged file alone can't be type checked; the formatters run as part of it.
+            run: golangci-lint run ./...
+            glob: "{*.go,go.mod,.golangci.yml}"
+
+          - name: go test
+            run: go test ./... && echo "0 issues."
+            glob: "{*.go,go.mod}"
 
           - name: hadolint
             run: hadolint {staged_files} && echo "0 issues."

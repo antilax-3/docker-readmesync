@@ -11,6 +11,3 @@
 LICENSE
 README.md
 renovate.json
-root/app/build
-root/app/node_modules
-root/app/package-lock.json
