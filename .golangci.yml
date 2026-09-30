@@ -6,16 +6,29 @@ linters:
   default: standard
   enable:
     - bodyclose
+    - canonicalheader
+    - contextcheck
+    - errchkjson
+    - errname
     - errorlint
+    - exptostd
+    - forcetypeassert
     - gocritic
+    - godot
     - gosec
+    - intrange
     - misspell
+    - nilerr
+    - nilnil
     - nolintlint
     - noctx
+    - perfsprint
     - revive
+    - thelper
     - unconvert
     - unparam
     - usestdlibvars
+    - usetesting
   settings:
     misspell:
       locale: US

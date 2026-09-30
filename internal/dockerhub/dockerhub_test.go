@@ -31,7 +31,7 @@ func (f *fake) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_ = json.NewEncoder(w).Encode(map[string]string{"access_token": "bearer-token"})
+		writeJSON(w, map[string]string{"access_token": "bearer-token"})
 	case r.Method == http.MethodPatch && strings.HasPrefix(r.URL.Path, "/v2/repositories/"):
 		if r.Header.Get("Authorization") != "Bearer bearer-token" {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -45,10 +45,23 @@ func (f *fake) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			f.stored[repo] = body["full_description"]
 		}
 
-		_ = json.NewEncoder(w).Encode(map[string]string{"full_description": f.stored[repo]})
+		writeJSON(w, map[string]string{"full_description": f.stored[repo]})
 	default:
 		http.NotFound(w, r)
 	}
+}
+
+// writeJSON encodes v as the response, answering 500 if it cannot, so a broken fake fails the test rather than
+// passing on an empty body.
+func writeJSON(w http.ResponseWriter, v any) {
+	data, err := json.Marshal(v)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+
+		return
+	}
+
+	_, _ = w.Write(data)
 }
 
 func newClient(t *testing.T, password string) (*fake, *Client) {
