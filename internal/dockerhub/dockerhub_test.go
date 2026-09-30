@@ -63,7 +63,7 @@ func newClient(t *testing.T, password string) (*fake, *Client) {
 
 func TestSetFullDescription(t *testing.T) {
 	// Docker Hub exchanges an account password and a personal access token for a bearer token the same way.
-	for name, password := range map[string]string{"password": "hunter2", "personal access token": "dckr_pat_secret"} {
+	for name, password := range map[string]string{"Password": "hunter2", "PersonalAccessToken": "dckr_pat_secret"} {
 		t.Run(name, func(t *testing.T) {
 			f, client := newClient(t, password)
 

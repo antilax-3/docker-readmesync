@@ -67,8 +67,8 @@ func TestHandlerSyncs(t *testing.T) {
 		query string
 		want  string
 	}{
-		{"master by default", "github_repo=antilax-3/docker-readmesync&dockerhub_repo=antilax3/readme-sync", "# readme-sync\n"},
-		{"requested branch", "github_repo=antilax-3/docker-readmesync&github_branch=renovate/golang-1.x&dockerhub_repo=antilax3/readme-sync", "# branch\n"},
+		{"MasterByDefault", "github_repo=antilax-3/docker-readmesync&dockerhub_repo=antilax3/readme-sync", "# readme-sync\n"},
+		{"RequestedBranch", "github_repo=antilax-3/docker-readmesync&github_branch=renovate/golang-1.x&dockerhub_repo=antilax3/readme-sync", "# branch\n"},
 	}
 
 	for _, tt := range tests {
@@ -95,14 +95,14 @@ func TestHandlerRejects(t *testing.T) {
 		code   int
 		body   string
 	}{
-		{"post", http.MethodPost, "", http.StatusMethodNotAllowed, "Method not allowed"},
-		{"missing github_repo", http.MethodGet, "dockerhub_repo=antilax3/readme-sync", http.StatusBadRequest, "Missing required fields in GET request"},
-		{"missing dockerhub_repo", http.MethodGet, "github_repo=antilax-3/docker-readmesync", http.StatusBadRequest, "Missing required fields in GET request"},
-		{"github_repo with a path", http.MethodGet, "github_repo=antilax-3/docker-readmesync/x&dockerhub_repo=antilax3/readme-sync", http.StatusBadRequest, "invalid github_repo"},
-		{"github_repo climbing out", http.MethodGet, "github_repo=antilax-3/..&dockerhub_repo=antilax3/readme-sync", http.StatusBadRequest, "invalid github_repo"},
-		{"branch climbing out", http.MethodGet, "github_repo=antilax-3/docker-readmesync&github_branch=../../x&dockerhub_repo=antilax3/readme-sync", http.StatusBadRequest, "invalid github_branch"},
-		{"dockerhub_repo with a path", http.MethodGet, "github_repo=antilax-3/docker-readmesync&dockerhub_repo=antilax3/readme-sync/tags", http.StatusBadRequest, "invalid dockerhub_repo"},
-		{"no readme", http.MethodGet, "github_repo=antilax-3/nope&dockerhub_repo=antilax3/readme-sync", http.StatusBadRequest, "no README.md in GitHub repository antilax-3/nope branch master"},
+		{"Post", http.MethodPost, "", http.StatusMethodNotAllowed, "Method not allowed"},
+		{"MissingGitHubRepo", http.MethodGet, "dockerhub_repo=antilax3/readme-sync", http.StatusBadRequest, "Missing required fields in GET request"},
+		{"MissingDockerHubRepo", http.MethodGet, "github_repo=antilax-3/docker-readmesync", http.StatusBadRequest, "Missing required fields in GET request"},
+		{"GitHubRepoWithPath", http.MethodGet, "github_repo=antilax-3/docker-readmesync/x&dockerhub_repo=antilax3/readme-sync", http.StatusBadRequest, "invalid github_repo"},
+		{"GitHubRepoClimbingOut", http.MethodGet, "github_repo=antilax-3/..&dockerhub_repo=antilax3/readme-sync", http.StatusBadRequest, "invalid github_repo"},
+		{"BranchClimbingOut", http.MethodGet, "github_repo=antilax-3/docker-readmesync&github_branch=../../x&dockerhub_repo=antilax3/readme-sync", http.StatusBadRequest, "invalid github_branch"},
+		{"DockerHubRepoWithPath", http.MethodGet, "github_repo=antilax-3/docker-readmesync&dockerhub_repo=antilax3/readme-sync/tags", http.StatusBadRequest, "invalid dockerhub_repo"},
+		{"NoReadme", http.MethodGet, "github_repo=antilax-3/nope&dockerhub_repo=antilax3/readme-sync", http.StatusBadRequest, "no README.md in GitHub repository antilax-3/nope branch master"},
 	}
 
 	for _, tt := range tests {

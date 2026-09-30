@@ -44,17 +44,17 @@ func TestReadmeErrors(t *testing.T) {
 		message string
 	}{
 		{
-			name:    "missing",
+			name:    "Missing",
 			handler: func(w http.ResponseWriter, _ *http.Request) { http.NotFound(w, nil) },
 			is:      ErrNotFound,
 		},
 		{
-			name:    "github failing",
+			name:    "GitHubFailing",
 			handler: func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusServiceUnavailable) },
 			message: "503 Service Unavailable",
 		},
 		{
-			name: "too large",
+			name: "TooLarge",
 			handler: func(w http.ResponseWriter, _ *http.Request) {
 				_, _ = io.WriteString(w, strings.Repeat("x", MaxReadmeBytes+1))
 			},

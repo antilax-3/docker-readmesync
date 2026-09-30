@@ -49,22 +49,22 @@ func TestLoad(t *testing.T) {
 		err      string
 	}{
 		{
-			name:     "full config",
+			name:     "FullConfig",
 			contents: `{"dockerhub_username":"nightah","dockerhub_password":"dckr_pat_x","port":8080}`,
 			want:     Config{DockerHubUsername: "nightah", DockerHubPassword: "dckr_pat_x", Port: 8080},
 		},
 		{
-			name:     "port defaults to 80",
+			name:     "PortDefaultsTo80",
 			contents: `{"dockerhub_username":"nightah","dockerhub_password":"hunter2"}`,
 			want:     Config{DockerHubUsername: "nightah", DockerHubPassword: "hunter2", Port: 80},
 		},
 		{
-			name:     "password is required",
+			name:     "PasswordIsRequired",
 			contents: `{"dockerhub_username":"nightah"}`,
 			err:      "missing required field 'dockerhub_password'",
 		},
 		{
-			name:     "invalid json",
+			name:     "InvalidJSON",
 			contents: `{`,
 			err:      "please check JSON validity",
 		},
