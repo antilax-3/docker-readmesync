@@ -1,0 +1,38 @@
+---
+version: "2"
+
+linters:
+  # errcheck, govet, ineffassign, staticcheck and unused, plus the checks below.
+  default: standard
+  enable:
+    - bodyclose
+    - errorlint
+    - gocritic
+    - gosec
+    - misspell
+    - nolintlint
+    - noctx
+    - revive
+    - unconvert
+    - unparam
+    - usestdlibvars
+  settings:
+    misspell:
+      locale: US
+  exclusions:
+    rules:
+      # Tests write fixtures to temporary directories and drive fake servers, where the file and request hardening
+      # gosec asks for protects nothing.
+      - path: _test\.go
+        linters:
+          - gosec
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/antilax-3/docker-readmesync
+...
