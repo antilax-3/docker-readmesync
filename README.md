@@ -4,7 +4,7 @@
 # AntilaX-3/readme-sync
 [![](https://images.microbadger.com/badges/version/antilax3/readme-sync.svg)](https://microbadger.com/images/antilax3/readme-sync "Get your own version badge on microbadger.com") [![](https://images.microbadger.com/badges/image/antilax3/readme-sync.svg)](https://microbadger.com/images/antilax3/readme-sync "Get your own image badge on microbadger.com") [![Docker Pulls](https://img.shields.io/docker/pulls/antilax3/readme-sync.svg)](https://hub.docker.com/r/antilax3/readme-sync/) [![Docker Stars](https://img.shields.io/docker/stars/antilax3/readme-sync.svg)](https://hub.docker.com/r/antilax3/readme-sync/)
 
-[readme-sync](https://github.com/AntilaX-3/docker-readmesync) is a simple server that that provides an API to update a DockerHub repository's full description based on a specified GitHub repository's README.md, written in Node.js. 
+[readme-sync](https://github.com/AntilaX-3/docker-readmesync) is a simple server that that provides an API to update a DockerHub repository's full description based on a specified GitHub repository's README.md, written in Go.
 ## Usage
 ```
 docker create --name=readmesync \
@@ -18,10 +18,10 @@ Two variants are built from the one Dockerfile, for `linux/amd64` and `linux/arm
 
 | Variant | Base | Tags |
 | --- | --- | --- |
-| wolfi | [antilax3/node](https://hub.docker.com/r/antilax3/node) `latest` | `latest` |
-| alpine | [antilax3/node](https://hub.docker.com/r/antilax3/node) `alpine` | `alpine` |
+| wolfi | [antilax3/wolfi](https://hub.docker.com/r/antilax3/wolfi) | `latest` |
+| alpine | [antilax3/alpine](https://hub.docker.com/r/antilax3/alpine) | `alpine` |
 
-Wolfi is the default. Both variants run the same bundle with the same packages, so the choice between them is only the base. Every build is also tagged `BK<build>`, with `-alpine` appended for the alpine variant.
+Wolfi is the default. Both variants run the same statically linked binary, so the choice between them is only the base. Every build is also tagged `BK<build>`, with `-alpine` appended for the alpine variant.
 
 ## Parameters
 The parameters are split into two halves, separated by a colon, the left hand side representing the host and the right the container side. For example with a volume -v external:internal - what this shows is the volume mapping from internal to external of the container. So -v /mnt/app/config:/config would map /config from inside the container to be accessible from /mnt/app/config on the host's filesystem.
@@ -50,20 +50,25 @@ The container uses a single volume mounted at '/config'. This volume stores the 
 
 ## Configuration
 
-The readmesync.json is copied to the /config volume when first run. It has two mandatory parameters.
+The readmesync.json is copied to the /config volume when first run, readable only by the container's user. It has two mandatory parameters and an optional port.
 
     dockerhub_username: String (Required) | Your DockerHub username
-    dockerhub_password: String (Required) | Your DockerHub password
+    dockerhub_password: String (Required) | Your DockerHub password, or a personal access token
+    port:               Number (Optional) | The port the API listens on, 80 by default
+
+Either the account password or a personal access token with read and write scope works. A token is recommended, as it can be scoped and revoked on its own, and it is required when the account has two-factor authentication or its organisation enforces SSO. Create one under Account settings, Personal access tokens.
 
 ## Using the application
 
 **API - GET command**
 
-You can provide a GitHub branch if you want to sync a `README.md` from an branch other than master, if none is provided master is assumed.
+You can provide a GitHub branch if you want to sync a `README.md` from a branch other than master, if none is provided master is assumed. Any path is accepted.
 ```
 http://<ip_address>:<port>/description/update?github_repo=<github_repo>&dockerhub_repo=<dockerhub_repo>
 http://<ip_address>:<port>/description/update?github_repo=<github_repo>&github_branch=<github_branch>&dockerhub_repo=<dockerhub_repo>
 ```
+
+The response is `200 OK` once Docker Hub has stored the README, `400` for a missing or malformed field or a repository or branch with no `README.md`, and `502` when Docker Hub refuses the login or the update, with Docker Hub's own message in the body.
 ## Development
 
 Linting runs locally through [lefthook](https://github.com/evilmartians/lefthook). Install the hooks once per clone:
@@ -72,7 +77,7 @@ Linting runs locally through [lefthook](https://github.com/evilmartians/lefthook
 lefthook install
 ```
 
-`pre-commit` runs [editorconfig-checker](https://github.com/editorconfig-checker/editorconfig-checker), [hadolint](https://github.com/hadolint/hadolint), `jq`, [shellcheck](https://github.com/koalaman/shellcheck), [typos](https://github.com/crate-ci/typos) and [yamllint](https://github.com/adrienverge/yamllint) over the staged files, and `commit-msg` enforces [Conventional Commits](https://www.conventionalcommits.org). Run everything on demand with:
+`pre-commit` runs `go test`, [editorconfig-checker](https://github.com/editorconfig-checker/editorconfig-checker), [hadolint](https://github.com/hadolint/hadolint), `jq`, [shellcheck](https://github.com/koalaman/shellcheck), [typos](https://github.com/crate-ci/typos) and [yamllint](https://github.com/adrienverge/yamllint) over the staged files, and `commit-msg` enforces [Conventional Commits](https://www.conventionalcommits.org). Run everything on demand with:
 
 ```bash
 lefthook run pre-commit --all-files
@@ -80,9 +85,10 @@ lefthook run pre-commit --all-files
 
 ### Dependencies
 
-The application's npm dependencies in `root/app/package.json` are managed by renovate. The base image is followed at `antilax3/node:latest` and `antilax3/node:alpine`, so node itself is bumped in [docker-baseimage-node](https://github.com/antilax-3/docker-baseimage-node) and reaches this image on its next build.
+readmesync uses the go standard library alone. Renovate bumps the `golang` build image in the Dockerfile and the go version in `go.mod`. The base images are followed at `antilax3/wolfi:latest` and `antilax3/alpine:latest`, so each build picks up their changes without a bump here.
 
 ## Version
+- **30/09/26:** Rewrite readme-sync in Go and build it on the wolfi and alpine base images
 - **30/09/26:** Build on wolfi by default and publish alpine under its own tag, for amd64 and arm64
 - **04/07/25:** Updated to use alpine 3.22 image and s6 v3 service structure
 - **22/02/18:** Updated to use alpine 3.7 image and build with jenkins

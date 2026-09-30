@@ -8,12 +8,12 @@ resolve_image "${VARIANT}"
 resolve_platform_image "${PLATFORM}" || exit 1
 
 case "${PLATFORM}" in
-  amd64) APK_ARCH="x86_64" ;;
-  arm64) APK_ARCH="aarch64" ;;
-  armv7) APK_ARCH="armv7" ;;
+  amd64) APK_ARCH="x86_64"; ELF_MACHINE="62" ;;
+  arm64) APK_ARCH="aarch64"; ELF_MACHINE="183" ;;
+  armv7) APK_ARCH="armv7"; ELF_MACHINE="40" ;;
 esac
 
-# The variants differ in libc and in the interpreter node is linked against. Wolfi also ships no getent, so the user
+# The variants differ in libc and in the interpreter the base's binaries are linked against. Wolfi also ships no getent, so the user
 # database is read out of /etc/passwd, which both bases have.
 case "${VARIANT}" in
   wolfi) OS_ID="wolfi"; LIBC="glibc"; INTERPRETER="/lib/ld-linux-*" ;;
@@ -47,10 +47,11 @@ check() {
   fi
 }
 
-# Waits for the readme-sync service to answer on port 80 and prints the status and body of a request carrying none of
-# the required fields. With no config mounted, the service's first start writes the default config and exits, and s6
-# starts it again against that file, so the wait covers a restart.
-READY="for i in \$(seq 1 40); do node -e \"fetch('http://localhost/').then(async (r) => console.log(r.status, await r.text()))\" 2> /dev/null && break; sleep 0.5; done"
+# Waits for the readme-sync service to answer on port 80 and prints the status line of a request carrying none of the
+# required fields. With no config mounted, the service's first start writes the default config and exits, and s6
+# starts it again against that file, so the wait covers a restart. Wolfi ships gnu wget and alpine busybox's, and both
+# print the response status under -S; the response bodies are covered by the go tests.
+READY="for i in \$(seq 1 40); do wget -S -O /dev/null http://localhost/ 2>&1 | grep -m1 -o 'HTTP/1\.[01] [0-9]* [A-Za-z ]*' && break; sleep 0.5; done"
 
 echo "--- :label: Image metadata [${DOCKER_PLATFORM}]"
 check "image platform is ${DOCKER_PLATFORM}" "${DOCKER_PLATFORM}" \
@@ -73,25 +74,20 @@ check "abc passwd entry" "abc:911:911:/config:/bin/false" \
   "$(run "" "grep '^abc:' /etc/passwd | cut -d: -f1,3,4,6,7")"
 check "abc is in the users group" "yes" "$(run "" "id -nG abc | tr ' ' '\\n' | grep -qx users && echo yes")"
 check "container keeps s6 supervision" "0" "$(docker run --rm --platform "${DOCKER_PLATFORM}" "${PLATFORM_IMAGE}" true > /dev/null 2>&1; echo $?)"
-check "node runs" "valid" "$(run "" "node --version | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$' && echo valid")"
 
 echo "--- :memo: Readme Sync"
-check "application bundle is installed" "/app/main.js" "$(run "" "ls /app/main.js")"
-check "application sources and build output are removed" "" \
-  "$(run "" "ls -d /app/src /app/build /app/package.json /app/package-lock.json 2> /dev/null" | xargs)"
-check "every package the bundle requires resolves" "docker-hub-api express fetch source-map-support/register" \
-  "$(run "" "cd /app && for m in \$(grep -o 'require(\"[^\"]*\")' main.js | sed -E 's/require\\(\"(.*)\"\\)/\\1/' | grep -vx fs | sort -u); do node -e \"require.resolve('\${m}')\" && echo \${m}; done" | xargs)"
-check "the build toolchain is not shipped" "" \
-  "$(run "" "ls -d /app/node_modules/backpack-core /app/node_modules/webpack /app/node_modules/.bin/backpack 2> /dev/null" | xargs)"
+check "readmesync is installed" "/app/readmesync" "$(run "" "ls /app/readmesync")"
+check "readmesync is built for ${APK_ARCH}" "${ELF_MACHINE}" "$(run "" "od -An -tu2 -j18 -N2 /app/readmesync" | xargs)"
 check "port 80 is exposed" '{"80/tcp":{}}' "$(docker image inspect -f '{{json .Config.ExposedPorts}}' "${PLATFORM_IMAGE}")"
 check "/config is a volume" '{"/config":{}}' "$(docker image inspect -f '{{json .Config.Volumes}}' "${PLATFORM_IMAGE}")"
-check "default config is written to /config on first start, owned by abc" "abc 80" \
-  "$(run "" "${READY} > /dev/null; echo \$(stat -c %U /config/readmesync.json) \$(node -p 'require(\"/config/readmesync.json\").port')")"
-check "readme-sync service rejects a request missing its fields on port 80" "400 Missing required fields in GET request" \
+# The default config carries the Docker Hub credentials once filled in, so only abc can read it.
+check "default config is written to /config on first start, owned by abc and private" "abc 600 1" \
+  "$(run "" "${READY} > /dev/null; echo \$(stat -c '%U %a' /config/readmesync.json) \$(grep -c '\"port\": 80' /config/readmesync.json)")"
+check "readme-sync service rejects a request missing its fields on port 80" "HTTP/1.1 400 Bad Request" \
   "$(run "" "${READY}")"
 # Under emulation the process's command line starts with the qemu interpreter, so only its tail is matched.
 check "readme-sync service runs as abc" "abc" \
-  "$(run "" "${READY} > /dev/null; for p in /proc/[0-9]*; do case \"\$(tr '\\0' ' ' < \${p}/cmdline 2> /dev/null)\" in *'node /app/main.js ') stat -c %U \${p} ;; esac; done")"
+  "$(run "" "${READY} > /dev/null; for p in /proc/[0-9]*; do case \"\$(tr '\\0' ' ' < \${p}/cmdline 2> /dev/null)\" in *'/app/readmesync ') stat -c %U \${p} ;; esac; done")"
 
 if [[ ${FAILURES} -gt 0 ]]; then
   echo "^^^ +++"
