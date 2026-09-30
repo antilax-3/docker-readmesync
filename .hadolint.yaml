@@ -1,0 +1,8 @@
+---
+failure-threshold: warning
+
+ignored:
+  # The base image is deliberately followed at latest and not pinned, so every build picks up its changes without
+  # a bump in this repository.
+  - DL3007
+...
