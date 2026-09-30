@@ -1,8 +1,6 @@
 # syntax=docker/dockerfile:1
 ARG BASE_IMAGE="antilax3/wolfi:latest"
 
-# readmesync is a static go binary, so it is cross-compiled once per target on the build platform rather than built
-# under emulation, and the same binary runs on either base.
 FROM --platform=${BUILDPLATFORM} golang:1.27-alpine AS build
 
 ARG TARGETOS
@@ -29,8 +27,6 @@ echo "**** build readmesync ****"
 CGO_ENABLED=0 GOOS="${TARGETOS}" GOARCH="${TARGETARCH}" go build -trimpath -buildvcs=false -ldflags="-s -w" \
   -o /out/app/readmesync ./cmd/readmesync
 
-# The service runs as abc and listens on port 80 by default, which only a process allowed to bind privileged ports
-# can do.
 setcap cap_net_bind_service=+ep /out/app/readmesync
 EOF
 
