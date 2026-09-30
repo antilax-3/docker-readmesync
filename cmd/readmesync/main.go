@@ -50,7 +50,7 @@ func run() error {
 
 	server := &http.Server{
 		Addr:              ":" + strconv.Itoa(cfg.Port),
-		Handler:           readmesync.Handler(syncer),
+		Handler:           readmesync.Handler(syncer, log.Default()),
 		ReadHeaderTimeout: 10 * time.Second,
 		WriteTimeout:      2 * time.Minute,
 	}

@@ -9,8 +9,8 @@ import (
 
 // Handler answers a GET on any path carrying github_repo and dockerhub_repo, and optionally github_branch, which
 // defaults to master. It responds 200 once the description is stored, 400 for a request that can never succeed, and
-// 502 when GitHub or Docker Hub fails.
-func Handler(syncer *Syncer) http.Handler {
+// 502 when GitHub or Docker Hub fails. Each sync is logged to logger.
+func Handler(syncer *Syncer, logger *log.Logger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			w.Header().Set("Allow", http.MethodGet)
@@ -42,13 +42,13 @@ func Handler(syncer *Syncer) http.Handler {
 				status = http.StatusBadRequest
 			}
 
-			log.Printf("sync %s@%s to %s failed: %v", req.GitHubRepo, req.GitHubBranch, req.DockerHubRepo, err)
+			logger.Printf("sync %s@%s to %s failed: %v", req.GitHubRepo, req.GitHubBranch, req.DockerHubRepo, err)
 			http.Error(w, err.Error(), status)
 
 			return
 		}
 
-		log.Printf("synced %s@%s to %s", req.GitHubRepo, req.GitHubBranch, req.DockerHubRepo)
+		logger.Printf("synced %s@%s to %s", req.GitHubRepo, req.GitHubBranch, req.DockerHubRepo)
 		_, _ = fmt.Fprintln(w, "OK")
 	})
 }

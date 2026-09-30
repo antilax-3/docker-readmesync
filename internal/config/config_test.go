@@ -20,6 +20,8 @@ func write(t *testing.T, contents string) string {
 }
 
 func TestLoadWritesTheDefaultWhenMissing(t *testing.T) {
+	t.Parallel()
+
 	path := filepath.Join(t.TempDir(), "readmesync.json")
 
 	if _, err := Load(path); !errors.Is(err, ErrDefaultWritten) {
@@ -42,6 +44,8 @@ func TestLoadWritesTheDefaultWhenMissing(t *testing.T) {
 }
 
 func TestLoad(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		contents string
@@ -72,6 +76,8 @@ func TestLoad(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			config, err := Load(write(t, tt.contents))
 
 			if tt.err != "" {

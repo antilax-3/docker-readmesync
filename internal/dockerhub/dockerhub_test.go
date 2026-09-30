@@ -75,9 +75,13 @@ func newClient(t *testing.T, password string) (*fake, *Client) {
 }
 
 func TestSetFullDescription(t *testing.T) {
+	t.Parallel()
+
 	// Docker Hub exchanges an account password and a personal access token for a bearer token the same way.
 	for name, password := range map[string]string{"Password": "hunter2", "PersonalAccessToken": "dckr_pat_secret"} {
 		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
 			f, client := newClient(t, password)
 
 			if err := client.SetFullDescription(t.Context(), "antilax3/readme-sync", "# readme-sync\n"); err != nil {
@@ -92,6 +96,8 @@ func TestSetFullDescription(t *testing.T) {
 }
 
 func TestSetFullDescriptionBadCredentials(t *testing.T) {
+	t.Parallel()
+
 	f, client := newClient(t, "wrong")
 
 	err := client.SetFullDescription(t.Context(), "antilax3/readme-sync", "# readme-sync\n")
@@ -108,6 +114,8 @@ func TestSetFullDescriptionBadCredentials(t *testing.T) {
 
 // The Node service reported success whenever Docker Hub's response carried no error field, whatever it stored.
 func TestSetFullDescriptionNotStored(t *testing.T) {
+	t.Parallel()
+
 	f, client := newClient(t, "dckr_pat_secret")
 	f.dropStore = true
 

@@ -43,10 +43,6 @@ func (s *sink) SetFullDescription(_ context.Context, repo, description string) e
 func serve(t *testing.T, method, query string, s *sink) (int, string) {
 	t.Helper()
 
-	output := log.Writer()
-	log.SetOutput(io.Discard)
-	t.Cleanup(func() { log.SetOutput(output) })
-
 	syncer := &Syncer{
 		Source: source{
 			"antilax-3/docker-readmesync@master":              "# readme-sync\n",
@@ -56,12 +52,14 @@ func serve(t *testing.T, method, query string, s *sink) (int, string) {
 	}
 
 	rec := httptest.NewRecorder()
-	Handler(syncer).ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), method, "/readmesync/update?"+query, nil))
+	Handler(syncer, log.New(io.Discard, "", 0)).ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), method, "/readmesync/update?"+query, nil))
 
 	return rec.Code, strings.TrimSpace(rec.Body.String())
 }
 
 func TestHandlerSyncs(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name  string
 		query string
@@ -73,6 +71,8 @@ func TestHandlerSyncs(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			s := &sink{stored: map[string]string{}}
 
 			code, body := serve(t, http.MethodGet, tt.query, s)
@@ -88,6 +88,8 @@ func TestHandlerSyncs(t *testing.T) {
 }
 
 func TestHandlerRejects(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name   string
 		method string
@@ -107,6 +109,8 @@ func TestHandlerRejects(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			s := &sink{stored: map[string]string{}}
 
 			code, body := serve(t, tt.method, tt.query, s)
@@ -122,6 +126,8 @@ func TestHandlerRejects(t *testing.T) {
 }
 
 func TestHandlerReportsUpstreamFailures(t *testing.T) {
+	t.Parallel()
+
 	s := &sink{err: fmt.Errorf("unable to log in to Docker Hub as nightah: %w", errors.New("401 Unauthorized: invalid username/password"))}
 
 	code, body := serve(t, http.MethodGet, "github_repo=antilax-3/docker-readmesync&dockerhub_repo=antilax3/readme-sync", s)

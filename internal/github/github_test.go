@@ -19,6 +19,8 @@ func newClient(t *testing.T, handler http.HandlerFunc) *Client {
 }
 
 func TestReadme(t *testing.T) {
+	t.Parallel()
+
 	var path string
 
 	client := newClient(t, func(w http.ResponseWriter, r *http.Request) {
@@ -37,6 +39,8 @@ func TestReadme(t *testing.T) {
 }
 
 func TestReadmeErrors(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		handler http.HandlerFunc
@@ -64,6 +68,8 @@ func TestReadmeErrors(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			_, err := newClient(t, tt.handler).Readme(t.Context(), "antilax-3/docker-readmesync", "master")
 
 			if tt.is != nil && !errors.Is(err, tt.is) {

@@ -22,9 +22,11 @@ linters:
     - nilnil
     - nolintlint
     - noctx
+    - paralleltest
     - perfsprint
     - revive
     - thelper
+    - tparallel
     - unconvert
     - unparam
     - usestdlibvars
