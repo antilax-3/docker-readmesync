@@ -1,3 +1,25 @@
+# syntax=docker/dockerfile:1
+FROM antilax3/node:latest AS build
+
+WORKDIR /app
+
+COPY root/app/ ./
+
+SHELL ["/bin/ash", "-euo", "pipefail", "-c"]
+
+RUN <<'EOF'
+set -euo pipefail
+
+echo "**** build node application ****"
+npm install
+npm run build
+
+echo "**** keep only the runtime dependencies ****"
+# backpack bundles src/ into build/main.js and leaves every package it requires external, so the image needs those
+# packages and none of the toolchain that built the bundle.
+npm prune --omit=dev
+EOF
+
 FROM antilax3/node:latest
 
 # set version labels
@@ -14,17 +36,9 @@ ENV NODE_CONFIG_DIR=/config
 WORKDIR /app
 
 # copy local files
-COPY root/ /
-
-# install packages
-RUN \
-  echo "**** build node application ****" && \
-    npm install && NODE_OPTIONS=--openssl-legacy-provider npm run build && mv build/main.js . && \
-  echo "**** cleanup ****" && \
-    rm -rf \
-      package*.json \
-      build \
-      src
+COPY --link root/etc/ /etc/
+COPY --link --from=build /app/build/main.js /app/main.js
+COPY --link --from=build /app/node_modules/ /app/node_modules/
 
 # ports and volumes
 EXPOSE 80
