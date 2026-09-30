@@ -1,5 +1,9 @@
 # syntax=docker/dockerfile:1
-FROM antilax3/node:latest AS build
+ARG BASE_IMAGE="antilax3/node:latest"
+
+# The bundle and every package it requires are plain javascript, with no native addon among them, so they are built
+# once on the build platform and copied into the image of each target platform unchanged.
+FROM --platform=${BUILDPLATFORM} ${BASE_IMAGE} AS build
 
 WORKDIR /app
 
@@ -20,7 +24,7 @@ echo "**** keep only the runtime dependencies ****"
 npm prune --omit=dev
 EOF
 
-FROM antilax3/node:latest
+FROM ${BASE_IMAGE}
 
 # set version labels
 ARG build_date

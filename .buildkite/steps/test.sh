@@ -13,21 +13,25 @@ case "${PLATFORM}" in
   armv7) APK_ARCH="armv7" ;;
 esac
 
-# Wolfi ships no getent, so the user database is read out of /etc/passwd.
+# The variants differ in libc and in the interpreter node is linked against. Wolfi also ships no getent, so the user
+# database is read out of /etc/passwd, which both bases have.
 case "${VARIANT}" in
   wolfi) OS_ID="wolfi"; LIBC="glibc"; INTERPRETER="/lib/ld-linux-*" ;;
+  alpine) OS_ID="alpine"; LIBC="musl"; INTERPRETER="/lib/ld-musl-*" ;;
 esac
 
 REVISION="${BUILDKITE_COMMIT}"
 MARKER="__TEST_OUTPUT__"
 FAILURES=0
 
-# Runs a shell script inside the container through /init and with-contenv, the same way the
-# image's services run, and returns only the script's output (not the s6 startup banner).
+# Runs a shell script inside the container through /init and with-contenv, the same way the image's services run, and
+# returns only the script's output. Every line the script prints is prefixed with a marker and only marked lines are
+# kept, because the s6 startup banner and the readme-sync service share the container's stdout, and under emulation
+# the service's log lines land in the middle of the script's output.
 run() {
   local options="$1" script="$2"
   # shellcheck disable=SC2086 # options holds multiple docker run flags and must be word split.
-  docker run --rm --platform "${DOCKER_PLATFORM}" ${options} "${PLATFORM_IMAGE}" /command/with-contenv sh -c "echo ${MARKER}; ${script}" 2> /dev/null | sed "1,/^${MARKER}\$/d"
+  docker run --rm --platform "${DOCKER_PLATFORM}" ${options} "${PLATFORM_IMAGE}" /command/with-contenv sh -c "( ${script} ) | sed 's/^/${MARKER} /'" 2> /dev/null | sed -n "s/^${MARKER} //p"
 }
 
 check() {
@@ -45,8 +49,7 @@ check() {
 
 # Waits for the readme-sync service to answer on port 80 and prints the status and body of a request carrying none of
 # the required fields. With no config mounted, the service's first start writes the default config and exits, and s6
-# starts it again against that file, so the wait covers a restart. The service logs to the same stdout as the script,
-# so the checks that start it read only the script's last line.
+# starts it again against that file, so the wait covers a restart.
 READY="for i in \$(seq 1 40); do node -e \"fetch('http://localhost/').then(async (r) => console.log(r.status, await r.text()))\" 2> /dev/null && break; sleep 0.5; done"
 
 echo "--- :label: Image metadata [${DOCKER_PLATFORM}]"
@@ -83,11 +86,12 @@ check "the build toolchain is not shipped" "" \
 check "port 80 is exposed" '{"80/tcp":{}}' "$(docker image inspect -f '{{json .Config.ExposedPorts}}' "${PLATFORM_IMAGE}")"
 check "/config is a volume" '{"/config":{}}' "$(docker image inspect -f '{{json .Config.Volumes}}' "${PLATFORM_IMAGE}")"
 check "default config is written to /config on first start, owned by abc" "abc 80" \
-  "$(run "" "${READY} > /dev/null; echo \$(stat -c %U /config/readmesync.json) \$(node -p 'require(\"/config/readmesync.json\").port')" | tail -n1)"
+  "$(run "" "${READY} > /dev/null; echo \$(stat -c %U /config/readmesync.json) \$(node -p 'require(\"/config/readmesync.json\").port')")"
 check "readme-sync service rejects a request missing its fields on port 80" "400 Missing required fields in GET request" \
-  "$(run "" "${READY}" | tail -n1)"
+  "$(run "" "${READY}")"
+# Under emulation the process's command line starts with the qemu interpreter, so only its tail is matched.
 check "readme-sync service runs as abc" "abc" \
-  "$(run "" "${READY} > /dev/null; for p in /proc/[0-9]*; do [ \"\$(tr '\\0' ' ' < \${p}/cmdline 2> /dev/null)\" = 'node /app/main.js ' ] && stat -c %U \${p}; done" | tail -n1)"
+  "$(run "" "${READY} > /dev/null; for p in /proc/[0-9]*; do case \"\$(tr '\\0' ' ' < \${p}/cmdline 2> /dev/null)\" in *'node /app/main.js ') stat -c %U \${p} ;; esac; done")"
 
 if [[ ${FAILURES} -gt 0 ]]; then
   echo "^^^ +++"
