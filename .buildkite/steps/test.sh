@@ -76,6 +76,10 @@ echo "--- :memo: Readme Sync"
 check "application bundle is installed" "/app/main.js" "$(run "" "ls /app/main.js")"
 check "application sources and build output are removed" "" \
   "$(run "" "ls -d /app/src /app/build /app/package.json /app/package-lock.json 2> /dev/null" | xargs)"
+check "every package the bundle requires resolves" "docker-hub-api express fetch source-map-support/register" \
+  "$(run "" "cd /app && for m in \$(grep -o 'require(\"[^\"]*\")' main.js | sed -E 's/require\\(\"(.*)\"\\)/\\1/' | grep -vx fs | sort -u); do node -e \"require.resolve('\${m}')\" && echo \${m}; done" | xargs)"
+check "the build toolchain is not shipped" "" \
+  "$(run "" "ls -d /app/node_modules/backpack-core /app/node_modules/webpack /app/node_modules/.bin/backpack 2> /dev/null" | xargs)"
 check "port 80 is exposed" '{"80/tcp":{}}' "$(docker image inspect -f '{{json .Config.ExposedPorts}}' "${PLATFORM_IMAGE}")"
 check "/config is a volume" '{"/config":{}}' "$(docker image inspect -f '{{json .Config.Volumes}}' "${PLATFORM_IMAGE}")"
 check "default config is written to /config on first start, owned by abc" "abc 80" \
