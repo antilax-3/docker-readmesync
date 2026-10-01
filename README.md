@@ -1,8 +1,15 @@
-[logo]: https://ci.nerv.com.au/userContent/antilax-3.png "AntilaX-3"
-[![alt text][logo]](https://github.com/AntilaX-3/)
+<p align="center">
+  <a href="https://github.com/AntilaX-3/"><img src="https://avatars.githubusercontent.com/u/35715409" width="150" title="AntilaX-3"></a>
+</p>
+
+<p align="center">
+  <a href="https://buildkite.com/antilax-3/readmesync"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fimg.shields.io%2Fbuildkite%2F7a27cff7045d481072d214c0ad352e4d7b43c4a2de755341c9%2Fmaster.json&query=%24.message&label=build&logo=buildkite&logoColor=%2314cc80&mode=dark&size=sm&variant=outline"><img alt="Build" src="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fimg.shields.io%2Fbuildkite%2F7a27cff7045d481072d214c0ad352e4d7b43c4a2de755341c9%2Fmaster.json&query=%24.message&label=build&logo=buildkite&logoColor=%2314cc80&mode=light&size=sm&variant=outline"></picture></a>
+  <a href="https://www.gnu.org/licenses/lgpl-3.0"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/antilax-3/docker-readmesync/license.svg?logo=gnu&logoColor=%23a42e2b&mode=dark&size=sm&variant=outline"><img alt="License" src="https://shieldcn.dev/github/antilax-3/docker-readmesync/license.svg?logo=gnu&logoColor=%23a42e2b&mode=light&size=sm&variant=outline"></picture></a>
+  <a href="https://hub.docker.com/r/antilax3/readme-sync/tags"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fimg.shields.io%2Fdocker%2Fimage-size%2Fantilax3%2Freadme-sync%2Flatest.json&query=%24.message&label=image%20size&logo=docker&logoColor=%232496ed&mode=dark&size=sm&variant=outline"><img alt="Docker Size" src="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fimg.shields.io%2Fdocker%2Fimage-size%2Fantilax3%2Freadme-sync%2Flatest.json&query=%24.message&label=image%20size&logo=docker&logoColor=%232496ed&mode=light&size=sm&variant=outline"></picture></a>
+  <a href="https://hub.docker.com/r/antilax3/readme-sync"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fimg.shields.io%2Fdocker%2Fpulls%2Fantilax3%2Freadme-sync.json&query=%24.message&label=pulls&logo=docker&logoColor=%232496ed&mode=dark&size=sm&variant=outline"><img alt="Docker Pulls" src="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fimg.shields.io%2Fdocker%2Fpulls%2Fantilax3%2Freadme-sync.json&query=%24.message&label=pulls&logo=docker&logoColor=%232496ed&mode=light&size=sm&variant=outline"></picture></a>
+</p>
 
 # AntilaX-3/readme-sync
-[![](https://images.microbadger.com/badges/version/antilax3/readme-sync.svg)](https://microbadger.com/images/antilax3/readme-sync "Get your own version badge on microbadger.com") [![](https://images.microbadger.com/badges/image/antilax3/readme-sync.svg)](https://microbadger.com/images/antilax3/readme-sync "Get your own image badge on microbadger.com") [![Docker Pulls](https://img.shields.io/docker/pulls/antilax3/readme-sync.svg)](https://hub.docker.com/r/antilax3/readme-sync/) [![Docker Stars](https://img.shields.io/docker/stars/antilax3/readme-sync.svg)](https://hub.docker.com/r/antilax3/readme-sync/)
 
 [readme-sync](https://github.com/AntilaX-3/docker-readmesync) is a simple server that that provides an API to update a DockerHub repository's full description based on a specified GitHub repository's README.md, written in Go.
 ## Usage
